@@ -2,8 +2,8 @@ postgres:
   name: postgres
   port: 5432
   targetPort: 5432
-  db: redash
-  user: redash
+  db: postgres
+  user: postgres
   password: jPTuA5Ep7ru5hfNdf6eySHnrm9pmBj4HaAXtccsrfejKytSytrq9YRfmb7TbB8u7
 
 redis:
@@ -13,5 +13,15 @@ redis:
 
 redash:
   name: redash
+  image: redash/redash:5.0.0.b4754
+  envFrom:
+  - configMapRef:
+      name: env
   port: 5000
   targetPort: 5000
+  workerName: redash-workers
+  workerResources:
+    limits:
+      cpu: 20m
+    requests:
+      cpu: 10m

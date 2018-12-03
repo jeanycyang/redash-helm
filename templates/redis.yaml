@@ -35,9 +35,9 @@ spec:
         image: redis:3.0-alpine
         resources:
           limits:
-            cpu: 100m
-          requests:
             cpu: 50m
+          requests:
+            cpu: 30m
         ports:
         - containerPort: {{ .Values.redis.port }}
         readinessProbe:

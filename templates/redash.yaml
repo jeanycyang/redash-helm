@@ -39,13 +39,63 @@ spec:
           requests:
             cpu: 100m
             memory: 1.5Gi
-        env:
-        - name: REDASH_WEB_WORKERS
-          value: "4"
-        - name: REDASH_DATABASE_URL
-          value: postgresql://{{ .Values.postgres.user }}:{{ .Values.postgres.password }}@{{ .Values.postgres.name }}
-        - name: REDASH_REDIS_URL
-          value: redis://{{ .Values.redis.name }}:{{ .Values.redis.targetPort }}
-        image: redash/redash:5.0.0.b4754
+        envFrom:
+        - configMapRef:
+            name: env
+        image: {{ .Values.redash.image }}
         ports:
         - containerPort: {{ .Values.redash.port }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.redash.workerName }}
+  labels:
+    app: {{ .Values.redash.workerName }}
+spec:
+  selector:
+    matchLabels:
+      run: {{ .Values.redash.workerName }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: {{ .Values.redash.workerName }}
+    spec:
+      containers:
+      - name: scheduler
+        resources:
+{{ toYaml .Values.redash.workerResources | indent 10 }} 
+        envFrom:
+{{ toYaml .Values.redash.envFrom | indent 8 }} 
+        env:
+        - name: QUEUES
+          value: celery
+        - name: WORKERS_COUNT
+          value: "1"
+        image: {{ .Values.redash.image }}
+        args: ["scheduler"]
+      - name: scheduled-worker
+        resources:
+{{ toYaml .Values.redash.workerResources | indent 10 }} 
+        envFrom:
+{{ toYaml .Values.redash.envFrom | indent 8 }} 
+        env:
+        - name: QUEUES
+          value: scheduled_queries
+        - name: WORKERS_COUNT
+          value: "1"
+        image: {{ .Values.redash.image }}
+        args: ["worker"]
+      - name: adhoc-worker
+        resources:
+{{ toYaml .Values.redash.workerResources | indent 10 }} 
+        envFrom:
+{{ toYaml .Values.redash.envFrom | indent 8 }} 
+        env:
+        - name: QUEUES
+          value: queries
+        - name: WORKERS_COUNT
+          value: "2"
+        image: {{ .Values.redash.image }}
+        args: ["worker"]
