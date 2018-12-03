@@ -30,6 +30,16 @@ spec:
       labels:
         run: {{ .Values.redash.name }}
     spec:
+      initContainers:
+      - name: create-db
+        image: {{ .Values.redash.image }}
+        args: ["create_db"]
+        securityContext:
+          privileged: true
+        resources:
+{{ toYaml .Values.redash.workerResources | indent 10 }}
+        envFrom:
+{{ toYaml .Values.redash.envFrom | indent 8 }}
       containers:
       - name: {{ .Values.redash.name }}
         resources:
