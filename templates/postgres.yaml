@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
       - name: {{ .Values.postgres.name }}
-        image: postgres:11.1-alpine
+        image: postgres:9.5.6-alpine
         resources:
           limits:
             cpu: 100m
@@ -51,11 +51,23 @@ spec:
         - containerPort: {{ .Values.postgres.port }}
         readinessProbe:
           exec:
-            command: ["pg_isready"]
-          initialDelaySeconds: 15
-          timeoutSeconds: 2
+            command:
+              - pg_isready
+              - "-U"
+              - {{ .Values.postgres.user }}
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
         livenessProbe:
           exec:
-            command: ["pg_isready"]
-          initialDelaySeconds: 45
-          timeoutSeconds: 2
+            command:
+              - pg_isready
+              - "-U"
+              - {{ .Values.postgres.user }}
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+        volumeMounts:
+{{ toYaml .Values.commonVolume.volumeMounts | indent 8 }}
+          mountPath: {{ .Values.commonVolume.mountPathForPostgres }}
+          subPath: postgres
+      volumes:
+{{ toYaml .Values.commonVolume.volumes | indent 6 }}

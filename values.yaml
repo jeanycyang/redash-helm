@@ -25,3 +25,15 @@ redash:
       cpu: 20m
     requests:
       cpu: 10m
+
+commonVolume:
+  name: redash-data
+  mountPathForRedash: /opt/redash/postgres-data
+  mountPathForPostgres: /var/lib/postgresql/data
+  volumeMounts:
+    - name: redash-data
+      readOnly: false
+  volumes:
+    - name: redash-data
+      persistentVolumeClaim:
+        claimName: redash-data

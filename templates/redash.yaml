@@ -45,6 +45,11 @@ spec:
         image: {{ .Values.redash.image }}
         ports:
         - containerPort: {{ .Values.redash.port }}
+        volumeMounts:
+{{ toYaml .Values.commonVolume.volumeMounts | indent 8 }}
+          mountPath: {{ .Values.commonVolume.mountPathForRedash }} 
+      volumes:
+{{ toYaml .Values.commonVolume.volumes | indent 6 }}  
 ---
 apiVersion: apps/v1
 kind: Deployment
