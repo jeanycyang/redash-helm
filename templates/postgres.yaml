@@ -32,7 +32,14 @@ spec:
     spec:
       containers:
       - name: {{ .Values.postgres.name }}
-        image: postgres:9.5.6-alpine
+        image: postgres:11.1-alpine
+        resources:
+          limits:
+            cpu: 100m
+            memory: 0.5Gi
+          requests:
+            cpu: 50m
+            memory: 0.3Gi
         env:
         - name: POSTGRES_DB
           value: {{ .Values.postgres.db }}
@@ -44,11 +51,11 @@ spec:
         - containerPort: {{ .Values.postgres.port }}
         readinessProbe:
           exec:
-            command: ["pg_isready", "-h", "localhost"]
+            command: ["pg_isready"]
           initialDelaySeconds: 15
           timeoutSeconds: 2
         livenessProbe:
           exec:
-            command: ["pg_isready", "-h", "localhost"]
+            command: ["pg_isready"]
           initialDelaySeconds: 45
           timeoutSeconds: 2

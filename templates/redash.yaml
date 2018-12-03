@@ -1,0 +1,51 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.redash.name }}
+  labels:
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: NodePort
+  ports:
+  - port: {{ .Values.redash.port }}
+    targetPort: {{ .Values.redash.targetPort }}
+  selector:
+    run: {{ .Values.redash.name }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.redash.name }}
+  labels:
+    app: {{ .Values.redash.name }}
+spec:
+  selector:
+    matchLabels:
+      run: {{ .Values.redash.name }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: {{ .Values.redash.name }}
+    spec:
+      containers:
+      - name: {{ .Values.redash.name }}
+        resources:
+          limits:
+            cpu: 500m
+            memory: 2Gi
+          requests:
+            cpu: 100m
+            memory: 1.5Gi
+        env:
+        - name: REDASH_WEB_WORKERS
+          value: "4"
+        - name: REDASH_DATABASE_URL
+          value: postgresql://{{ .Values.postgres.user }}:{{ .Values.postgres.password }}@{{ .Values.postgres.name }}
+        - name: REDASH_REDIS_URL
+          value: redis://{{ .Values.redis.name }}:{{ .Values.redis.targetPort }}
+        image: redash/redash:5.0.0.b4754
+        ports:
+        - containerPort: {{ .Values.redash.port }}

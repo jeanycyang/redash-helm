@@ -33,6 +33,11 @@ spec:
       containers:
       - name: {{ .Values.redis.name }}
         image: redis:3.0-alpine
+        resources:
+          limits:
+            cpu: 100m
+          requests:
+            cpu: 50m
         ports:
         - containerPort: {{ .Values.redis.port }}
         readinessProbe:
