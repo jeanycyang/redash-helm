@@ -1,0 +1,47 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.redis.name }}
+  labels:
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: NodePort
+  ports:
+  - port: {{ .Values.redis.port }}
+    targetPort: {{ .Values.redis.targetPort }}
+  selector:
+    run: {{ .Values.redis.name }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.redis.name }}
+  labels:
+    app: {{ .Values.redis.name }}
+spec:
+  selector:
+    matchLabels:
+      run: {{ .Values.redis.name }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: {{ .Values.redis.name }}
+    spec:
+      containers:
+      - name: {{ .Values.redis.name }}
+        image: redis:3.0-alpine
+        ports:
+        - containerPort: {{ .Values.redis.port }}
+        readinessProbe:
+          exec:
+            command: ["sh", "-c", "redis-cli ping"]
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+        livenessProbe:
+          exec:
+            command: ["sh", "-c", "redis-cli ping"]
+          initialDelaySeconds: 10
+          periodSeconds: 3

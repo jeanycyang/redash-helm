@@ -5,3 +5,8 @@ postgres:
   db: redash
   user: redash
   password: jPTuA5Ep7ru5hfNdf6eySHnrm9pmBj4HaAXtccsrfejKytSytrq9YRfmb7TbB8u7
+
+redis:
+  name: redis
+  port: 6379
+  targetPort: 6379
